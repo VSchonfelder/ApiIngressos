@@ -1,4 +1,4 @@
-Histórias de Usuário
+Histórias de Usuário:
 
 1. 
 
@@ -25,5 +25,14 @@ Quero validar se um CPF já está cadastrado antes de criar um novo usuário,
 Para evitar registros duplicados e garantir a integridade dos dados.
 
 
+Critérios de Aceitação:
 
-/
+1.
+Dado que já existe um usuário com o CPF "x",
+quando tentar eu cadastrar outro usuário com o mesmo CPF.
+Então o sistema deve retornar o erro 400.
+
+2.
+Dado que eu já peguei um cupom,
+quando eu tentar pegar o mesmo cupom mais de uma vez.
+Então o app precisa permitir que eu tenha apenas um do mesmo cupom.
