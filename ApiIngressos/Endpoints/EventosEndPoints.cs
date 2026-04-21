@@ -24,7 +24,6 @@ public static class EventosEndpoints
             return Results.Ok(evento);
         });
 
-        // GET - Listar eventos
         app.MapGet("/api/eventos", async (DbConnectionFactory factory) =>
         {
             using var db = factory.CreateConnection();
