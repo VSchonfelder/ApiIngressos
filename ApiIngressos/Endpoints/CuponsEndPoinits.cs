@@ -8,8 +8,10 @@ public static class CuponsEndpoints
 {
     public static void MapCuponsEndpoints(this WebApplication app)
     {
-        app.MapPost("/api/cupons", async (Cupom cupom, IDbConnection db) =>
+        app.MapPost("/api/cupons", async (Cupom cupom, DbConnectionFactory factory) =>
         {
+            using var db = factory.CreateConnection();
+            
             var sql = @"
                 INSERT INTO Cupons
                 (Codigo, PorcentagemDesconto, ValorMinimoRegra)
