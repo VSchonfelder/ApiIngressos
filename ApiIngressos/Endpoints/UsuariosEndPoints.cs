@@ -8,9 +8,10 @@ public static class UsuariosEndpoints
 {
     public static void MapUsuariosEndpoints(this WebApplication app)
     {
-        app.MapPost("/api/usuarios", async (Usuario usuario, IDbConnection db) =>
+        app.MapPost("/api/usuarios", async (Usuario usuario, DbConnectionFactory factory) =>
         {
-            // Verifica se já existe um usuário com o CPF informado
+            using var db = factory.CreateConnection();
+            
             var sqlVerificar = "SELECT COUNT(*) FROM Usuarios WHERE Cpf = @Cpf";
 
             var quantidade = await db.ExecuteScalarAsync<int>(
@@ -23,7 +24,6 @@ public static class UsuariosEndpoints
                 return Results.BadRequest("CPF já cadastrado.");
             }
 
-            // Insere o usuário no banco
             var sqlInserir = @"
                 INSERT INTO Usuarios (Cpf, Nome, Email)
                 VALUES (@Cpf, @Nome, @Email)
