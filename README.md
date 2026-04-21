@@ -30,7 +30,7 @@ Projeto acadêmico da disciplina de Engenharia de Software, com foco em seguran�
 ### 1. Clonar o repositório
 
 ```
-git clone <URL_DO_REPOSITORIO>
+git clone <https://github.com/VSchonfelder/ApiIngressos.gitL_DO_REPOSITORIO>
 cd repo
 ```
 
