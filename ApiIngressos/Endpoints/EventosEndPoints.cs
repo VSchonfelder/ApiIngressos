@@ -8,9 +8,10 @@ public static class EventosEndpoints
 {
     public static void MapEventosEndpoints(this WebApplication app)
     {
-        // POST - Criar evento
-        app.MapPost("/api/eventos", async (Evento evento, IDbConnection db) =>
+        app.MapPost("/api/eventos", async (Evento evento, DbConnectionFactory factory) =>
         {
+            using var db = factory.CreateConnection();
+            
             var sql = @"
                 INSERT INTO Eventos
                 (Nome, CapacidadeTotal, DataEvento, PrecoPadrao)
@@ -23,9 +24,10 @@ public static class EventosEndpoints
             return Results.Ok(evento);
         });
 
-        // GET - Listar eventos
-        app.MapGet("/api/eventos", async (IDbConnection db) =>
+        app.MapGet("/api/eventos", async (DbConnectionFactory factory) =>
         {
+            using var db = factory.CreateConnection();
+            
             var sql = "SELECT Id, Nome, CapacidadeTotal, DataEvento, PrecoPadrao FROM Eventos";
 
             var eventos = await db.QueryAsync<Evento>(sql);
