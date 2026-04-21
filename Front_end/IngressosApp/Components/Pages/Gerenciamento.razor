@@ -1,0 +1,236 @@
+﻿@page "/gerenciamento"
+@rendermode InteractiveServer
+@using IngressosApp.Services
+@inject EventoService EventoService
+@inject UsuarioService UsuarioService
+@inject CupomService CupomService
+
+<h3>Gerenciamento</h3>
+
+<button @onclick='() => abaAtiva = "eventos"'>Eventos</button>
+<button @onclick='() => abaAtiva = "usuarios"'>Usuários</button>
+<button @onclick='() => abaAtiva = "cupons"'>Cupons</button>
+
+<hr />
+
+@if (abaAtiva == "eventos")
+{
+    <h4>Gerenciar Eventos</h4>
+
+    @if (EventoService.GetEventos().Count == 0)
+    {
+        <p>Nenhum evento cadastrado ainda.</p>
+    }
+    else
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Data</th>
+                    <th>Local</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var evento in EventoService.GetEventos())
+                {
+                    <tr>
+                        @if (eventoEditando == evento)
+                        {
+                            <td><input @bind="editEventoNome" /></td>
+                            <td><input type="date" @bind="editEventoData" /></td>
+                            <td><input @bind="editEventoLocal" /></td>
+                            <td>
+                                <button @onclick="() => SalvarEvento(evento)">Salvar</button>
+                                <button @onclick="() => eventoEditando = null">Cancelar</button>
+                            </td>
+                        }
+                        else
+                        {
+                            <td>@evento.Nome</td>
+                            <td>@evento.Data.ToShortDateString()</td>
+                            <td>@evento.Local</td>
+                            <td>
+                                <button @onclick="() => EditarEvento(evento)">Editar</button>
+                                <button @onclick="() => EventoService.RemoverEvento(evento)">Deletar</button>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+@if (abaAtiva == "usuarios")
+{
+    <h4>Gerenciar Usuários</h4>
+
+    @if (UsuarioService.GetUsuarios().Count == 0)
+    {
+        <p>Nenhum usuário cadastrado ainda.</p>
+    }
+    else
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>CPF</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var usuario in UsuarioService.GetUsuarios())
+                {
+                    <tr>
+                        @if (usuarioEditando == usuario)
+                        {
+                            <td><input @bind="editUsuarioNome" /></td>
+                            <td><input type="email" @bind="editUsuarioEmail" /></td>
+                            <td><input @bind="editUsuarioCpf" /></td>
+                            <td>
+                                <button @onclick="() => SalvarUsuario(usuario)">Salvar</button>
+                                <button @onclick="() => usuarioEditando = null">Cancelar</button>
+                            </td>
+                        }
+                        else
+                        {
+                            <td>@usuario.Nome</td>
+                            <td>@usuario.Email</td>
+                            <td>@usuario.CPF</td>
+                            <td>
+                                <button @onclick="() => EditarUsuario(usuario)">Editar</button>
+                                <button @onclick="() => UsuarioService.RemoverUsuario(usuario)">Deletar</button>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+@if (abaAtiva == "cupons")
+{
+    <h4>Gerenciar Cupons</h4>
+
+    @if (CupomService.GetCupons().Count == 0)
+    {
+        <p>Nenhum cupom cadastrado ainda.</p>
+    }
+    else
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Desconto</th>
+                    <th>Valor Mínimo</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var cupom in CupomService.GetCupons())
+                {
+                    <tr>
+                        @if (cupomEditando == cupom)
+                        {
+                            <td><input @bind="editCupomCodigo" /></td>
+                            <td><input type="number" @bind="editCupomPorcentagem" min="1" max="100" /></td>
+                            <td><input type="number" @bind="editCupomValorMinimo" min="0" /></td>
+                            <td>
+                                <button @onclick="() => SalvarCupom(cupom)">Salvar</button>
+                                <button @onclick="() => cupomEditando = null">Cancelar</button>
+                            </td>
+                        }
+                        else
+                        {
+                            <td>@cupom.Codigo</td>
+                            <td>@cupom.PorcentagemDesconto%</td>
+                            <td>R$ @cupom.ValorMinimoRegra</td>
+                            <td>
+                                <button @onclick="() => EditarCupom(cupom)">Editar</button>
+                                <button @onclick="() => CupomService.RemoverCupom(cupom)">Deletar</button>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+@code {
+    private string abaAtiva = "eventos";
+
+    // =========== Evento =========== 
+    private Evento? eventoEditando = null;
+    private string editEventoNome = "";
+    private string editEventoLocal = "";
+    private DateTime editEventoData = DateTime.Today;
+
+    private void EditarEvento(Evento evento)
+    {
+        eventoEditando = evento;
+        editEventoNome = evento.Nome;
+        editEventoData = evento.Data;
+        editEventoLocal = evento.Local;
+    }
+
+    private void SalvarEvento(Evento evento)
+    {
+        evento.Nome = editEventoNome;
+        evento.Data = editEventoData;
+        evento.Local = editEventoLocal;
+        eventoEditando = null;
+    }
+    // =========== Evento ===========
+
+    // =========== Usuário =========== 
+    private Usuario? usuarioEditando = null;
+    private string editUsuarioNome = "";
+    private string editUsuarioEmail = "";
+    private string editUsuarioCpf = "";
+
+    private void EditarUsuario(Usuario usuario)
+    {
+        usuarioEditando = usuario;
+        editUsuarioNome = usuario.Nome;
+        editUsuarioEmail = usuario.Email;
+        editUsuarioCpf = usuario.CPF;
+    }
+
+    private void SalvarUsuario(Usuario usuario)
+    {
+        usuario.Nome = editUsuarioNome;
+        usuario.Email = editUsuarioEmail;
+        usuario.CPF = editUsuarioCpf;
+        usuarioEditando = null;
+    }
+    // =========== Usuário =========== 
+
+    // =========== Cupom =========== 
+    private Cupom? cupomEditando = null;
+    private string editCupomCodigo = "";
+    private decimal editCupomPorcentagem = 0;
+    private decimal editCupomValorMinimo = 0;
+
+    private void EditarCupom(Cupom cupom)
+    {
+        cupomEditando = cupom;
+        editCupomCodigo = cupom.Codigo;
+        editCupomPorcentagem = cupom.PorcentagemDesconto;
+        editCupomValorMinimo = cupom.ValorMinimoRegra;
+    }
+
+    private void SalvarCupom(Cupom cupom)
+    {
+        cupom.Codigo = editCupomCodigo;
+        cupom.PorcentagemDesconto = editCupomPorcentagem;
+        cupom.ValorMinimoRegra = editCupomValorMinimo;
+        cupomEditando = null;
+    }
+}
