@@ -9,7 +9,7 @@ Projeto acadêmico da disciplina de Engenharia de Software, com foco em seguran�
 
 * C# (.NET Minimal API)
 * Dapper
-* Banco de Dados Relacional (SQL)
+* PostgreSQL
 * xUnit (Testes automatizados)
 
 ---
@@ -30,8 +30,8 @@ Projeto acadêmico da disciplina de Engenharia de Software, com foco em seguran�
 ### 1. Clonar o repositório
 
 ```
-git clone <https://github.com/VSchonfelder/ApiIngressos.git>
-cd repo
+git clone https://github.com/VSchonfelder/ApiIngressos.git
+cd ApiIngressos
 ```
 
 ---
@@ -52,24 +52,41 @@ dotnet build
 
 ---
 
-### 4. Executar a API
+### 4. Configurar conexão com o banco
+
+Edite o arquivo:
 
 ```
-dotnet run --project src/ApiIngressos
+src/ApiIngressos/appsettings.json
+```
+
+E configure a connection string:
+
+```
+"ConnectionStrings": {
+  "DefaultConnection": "Host=localhost;Port=5432;Database=IngressosDB;Username=postgres;Password=SUA_SENHA"
+}
 ```
 
 ---
 
-## 🗄️ Banco de Dados
+### 5. Criar o banco de dados
 
-1. Criar um banco de dados relacional (ex: PostgreSQL)
-2. Executar o script localizado em:
+1. Crie um banco no PostgreSQL (ex: `IngressosDB`)
+2. Execute o script:
 
 ```
 /db/script.sql
 ```
 
-3. Configurar a connection string no projeto
+---
+
+### 6. Executar a API
+
+```
+cd src/ApiIngressos
+dotnet run
+```
 
 ---
 
@@ -112,8 +129,8 @@ Para executar os testes:
 dotnet test
 ```
 
-✔ Todos os testes utilizam `Assert`
-✔ Projeto estruturado com xUnit
+* Todos os testes utilizam `Assert`
+* Projeto estruturado com xUnit
 
 ---
 
@@ -127,9 +144,8 @@ dotnet test
 
 ## 👥 Equipe
 
-* Vinícius — Banco de Dados e Infraestrutura
-* Arthur — Endpoints de Eventos
-* Rodrigo — Usuários e Cupons + Regras de Negócio + xUnit
-* David — Segurança e Revisão + FrontEnd
+* Vinícius Schonfelder (06010595) — Banco de Dados e Infraestrutura
+* Arthur Fita Santana (06008892) — Endpoints de Eventos
+* Rodrigo da Costa Cernigoi (06012368) — Usuários e Cupons + Regras de Negócio + xUnit
+* David Almeida Ferreira (06012723) — Segurança e Revisão + FrontEnd
 
----
