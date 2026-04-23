@@ -33,5 +33,16 @@ public static class UsuariosEndpoints
 
             return Results.Ok(usuario);
         });
+
+        app.MapGet("/api/usuarios", async (DbConnectionFactory factory) =>
+{
+    using var db = factory.CreateConnection();
+
+    var sql = "SELECT Cpf, Nome, Email FROM Usuarios";
+
+    var usuarios = await db.QueryAsync<Usuario>(sql);
+
+    return Results.Ok(usuarios);
+});
     }
 }

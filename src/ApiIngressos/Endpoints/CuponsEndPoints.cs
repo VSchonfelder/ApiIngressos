@@ -23,5 +23,19 @@ public static class CuponsEndpoints
 
             return Results.Ok(cupom);
         });
+
+        app.MapGet("/api/cupons", async (DbConnectionFactory factory) =>
+        {
+            using var db = factory.CreateConnection();
+
+            var sql = @"
+                SELECT Codigo, PorcentagemDesconto, ValorMinimoRegra
+                FROM Cupons
+            ";
+
+            var cupons = await db.QueryAsync<Cupom>(sql);
+
+            return Results.Ok(cupons);
+        });
     }
 }

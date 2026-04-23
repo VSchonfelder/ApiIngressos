@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ApiIngressos\OptimusTicket.csproj" />
+    <ProjectReference Include="..\..\src\ApiIngressos\OptimusTicket.csproj" />
   </ItemGroup>
 
 </Project>

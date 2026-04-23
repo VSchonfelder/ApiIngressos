@@ -1,2 +1,9 @@
 <Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/ApiIngressos/">
+    <Project Path="src/ApiIngressos/OptimusTicket.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ApiIngressos.Tests/ApiIngressos.Tests.csproj" />
+  </Folder>
 </Solution>

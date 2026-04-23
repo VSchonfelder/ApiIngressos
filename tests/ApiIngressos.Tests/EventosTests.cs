@@ -7,4 +7,14 @@ public class EventosTests
     {
         Assert.True(true);
     }
+
+    [Fact]
+public void NaoDevePermitirEventoSemNome()
+{
+    var evento = new Evento { Nome = "" };
+
+    var valido = !string.IsNullOrWhiteSpace(evento.Nome);
+
+    Assert.False(valido);
+}
 }

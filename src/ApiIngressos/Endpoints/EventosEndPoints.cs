@@ -33,6 +33,22 @@ public static class EventosEndpoints
             var eventos = await db.QueryAsync<Evento>(sql);
 
             return Results.Ok(eventos);
-        });
+        }
+        
+        );
+
+        app.MapDelete("/api/eventos/{id}", async (int id, DbConnectionFactory factory) =>
+{
+        using var db = factory.CreateConnection();
+
+        var sql = "DELETE FROM Eventos WHERE Id = @Id";
+
+        var linhasAfetadas = await db.ExecuteAsync(sql, new { Id = id });
+
+        if (linhasAfetadas == 0)
+        return Results.NotFound("Evento não encontrado");
+
+    return Results.Ok("Evento removido com sucesso");
+});
     }
 }
