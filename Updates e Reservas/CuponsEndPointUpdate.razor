@@ -1,0 +1,63 @@
+﻿using Dapper;
+using ApiIngressos.Models;
+
+namespace ApiIngressos.Endpoints;
+
+public static class CuponsEndpoints
+{
+    public static void MapCuponsEndpoints(this WebApplication app)
+    {
+        app.MapPost("/api/cupons", async (Cupom cupom, DbConnectionFactory factory) =>
+        {
+            using var db = factory.CreateConnection();
+
+            if (string.IsNullOrWhiteSpace(cupom.Codigo))
+                return Results.BadRequest("O código do cupom não pode ser vazio.");
+
+            if (cupom.PorcentagemDesconto <= 0 || cupom.PorcentagemDesconto > 100)
+                return Results.BadRequest("A porcentagem de desconto deve ser entre 1 e 100.");
+
+            if (cupom.ValorMinimoRegra <= 0)
+                return Results.BadRequest("O valor mínimo deve ser maior que zero.");
+
+            var sql = @"
+                INSERT INTO Cupons (Codigo, PorcentagemDesconto, ValorMinimoRegra)
+                VALUES (@Codigo, @PorcentagemDesconto, @ValorMinimoRegra)
+            ";
+            await db.ExecuteAsync(sql, cupom);
+            return Results.Ok(cupom);
+        });
+
+        app.MapGet("/api/cupons", async (DbConnectionFactory factory) =>
+        {
+            using var db = factory.CreateConnection();
+
+            var sql = "SELECT Codigo, PorcentagemDesconto, ValorMinimoRegra FROM Cupons";
+            var cupons = await db.QueryAsync<Cupom>(sql);
+            return Results.Ok(cupons);
+        });
+
+        app.MapDelete("/api/cupons/{codigo}", async (string codigo, DbConnectionFactory factory) =>
+        {
+            using var db = factory.CreateConnection();
+
+            var emUso = await db.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM Reservas WHERE CupomUtilizado = @Codigo",
+                new { Codigo = codigo }
+            );
+
+            if (emUso > 0)
+                return Results.BadRequest("Cupom não pode ser removido pois está vinculado a reservas.");
+
+            var linhasAfetadas = await db.ExecuteAsync(
+                "DELETE FROM Cupons WHERE Codigo = @Codigo",
+                new { Codigo = codigo }
+            );
+
+            if (linhasAfetadas == 0)
+                return Results.NotFound("Cupom não encontrado.");
+
+            return Results.Ok("Cupom removido com sucesso.");
+        });
+    }
+}
