@@ -11,7 +11,16 @@ public static class CuponsEndpoints
         app.MapPost("/api/cupons", async (Cupom cupom, DbConnectionFactory factory) =>
         {
             using var db = factory.CreateConnection();
-            
+
+            if (string.IsNullOrWhiteSpace(cupom.Codigo))
+                return Results.BadRequest("O código do cupom não pode ser vazio.");
+
+            if (cupom.PorcentagemDesconto <= 0 || cupom.PorcentagemDesconto > 100)
+                return Results.BadRequest("A porcentagem de desconto deve ser entre 1 e 100.");
+
+            if (cupom.ValorMinimoRegra <= 0)
+                return Results.BadRequest("O valor mínimo deve ser maior que zero.");
+
             var sql = @"
                 INSERT INTO Cupons
                 (Codigo, PorcentagemDesconto, ValorMinimoRegra)
@@ -36,6 +45,29 @@ public static class CuponsEndpoints
             var cupons = await db.QueryAsync<Cupom>(sql);
 
             return Results.Ok(cupons);
+        });
+
+        app.MapDelete("/api/cupons/{codigo}", async (string codigo, DbConnectionFactory factory) =>
+        {
+            using var db = factory.CreateConnection();
+
+            var emUso = await db.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM Reservas WHERE CupomUtilizado = @Codigo",
+                new { Codigo = codigo }
+            );
+
+            if (emUso > 0)
+                return Results.BadRequest("Cupom não pode ser removido pois está vinculado a reservas.");
+
+            var linhasAfetadas = await db.ExecuteAsync(
+                "DELETE FROM Cupons WHERE Codigo = @Codigo",
+                new { Codigo = codigo }
+            );
+
+            if (linhasAfetadas == 0)
+                return Results.NotFound("Cupom não encontrado.");
+
+            return Results.Ok("Cupom removido com sucesso.");
         });
     }
 }

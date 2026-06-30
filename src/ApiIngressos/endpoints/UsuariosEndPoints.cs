@@ -11,18 +11,23 @@ public static class UsuariosEndpoints
         app.MapPost("/api/usuarios", async (Usuario usuario, DbConnectionFactory factory) =>
         {
             using var db = factory.CreateConnection();
-            
-            var sqlVerificar = "SELECT COUNT(*) FROM Usuarios WHERE Cpf = @Cpf";
 
-            var quantidade = await db.ExecuteScalarAsync<int>(
-                sqlVerificar,
+            if (string.IsNullOrWhiteSpace(usuario.Cpf) || usuario.Cpf.Length != 11 || !usuario.Cpf.All(char.IsDigit))
+                return Results.BadRequest("CPF inválido. Deve conter exatamente 11 dígitos numéricos.");
+
+            if (string.IsNullOrWhiteSpace(usuario.Nome))
+                return Results.BadRequest("O nome do usuário não pode ser vazio.");
+
+            if (string.IsNullOrWhiteSpace(usuario.Email) || !usuario.Email.Contains('@'))
+                return Results.BadRequest("E-mail inválido.");
+
+            var cpfExistente = await db.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM Usuarios WHERE Cpf = @Cpf",
                 new { usuario.Cpf }
             );
 
-            if (quantidade > 0)
-            {
+            if (cpfExistente > 0)
                 return Results.BadRequest("CPF já cadastrado.");
-            }
 
             var sqlInserir = @"
                 INSERT INTO Usuarios (Cpf, Nome, Email)
@@ -35,14 +40,37 @@ public static class UsuariosEndpoints
         });
 
         app.MapGet("/api/usuarios", async (DbConnectionFactory factory) =>
-{
-    using var db = factory.CreateConnection();
+        {
+            using var db = factory.CreateConnection();
 
-    var sql = "SELECT Cpf, Nome, Email FROM Usuarios";
+            var sql = "SELECT Cpf, Nome, Email FROM Usuarios";
 
-    var usuarios = await db.QueryAsync<Usuario>(sql);
+            var usuarios = await db.QueryAsync<Usuario>(sql);
 
-    return Results.Ok(usuarios);
-});
+            return Results.Ok(usuarios);
+        });
+
+        app.MapDelete("/api/usuarios/{cpf}", async (string cpf, DbConnectionFactory factory) =>
+        {
+            using var db = factory.CreateConnection();
+
+            var temReservas = await db.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM Reservas WHERE UsuarioCpf = @Cpf",
+                new { Cpf = cpf }
+            );
+
+            if (temReservas > 0)
+                return Results.BadRequest("Usuário não pode ser removido pois possui reservas ativas.");
+
+            var linhasAfetadas = await db.ExecuteAsync(
+                "DELETE FROM Usuarios WHERE Cpf = @Cpf",
+                new { Cpf = cpf }
+            );
+
+            if (linhasAfetadas == 0)
+                return Results.NotFound("Usuário não encontrado.");
+
+            return Results.Ok("Usuário removido com sucesso.");
+        });
     }
 }

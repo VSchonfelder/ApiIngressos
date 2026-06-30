@@ -25,5 +25,6 @@ app.MapGet("/teste", () => "ok");
 app.MapEventosEndpoints();
 app.MapUsuariosEndpoints();
 app.MapCuponsEndpoints();
+app.MapReservasEndpoints();
 
 app.Run();

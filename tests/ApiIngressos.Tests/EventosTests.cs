@@ -1,4 +1,5 @@
 using Xunit;
+using ApiIngressos.Models;
 
 public class EventosTests
 {
@@ -9,12 +10,12 @@ public class EventosTests
     }
 
     [Fact]
-public void NaoDevePermitirEventoSemNome()
-{
-    var evento = new Evento { Nome = "" };
+    public void NaoDevePermitirEventoSemNome()
+    {
+        var evento = new Evento { Nome = "" };
 
-    var valido = !string.IsNullOrWhiteSpace(evento.Nome);
+        var valido = !string.IsNullOrWhiteSpace(evento.Nome);
 
-    Assert.False(valido);
-}
+        Assert.False(valido);
+    }
 }

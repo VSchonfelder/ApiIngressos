@@ -1,4 +1,0 @@
-Não cheguei a testar no projeto em si mas tenho praticamente certeza q n deve ferrar com o trabalho
-
-As updates é pq André disse q precisaria de adicionar 2 endpoints ou atualizar significamente os que já existiam,
-então nós atualiza um pouco os outros e adiciona mais 1
