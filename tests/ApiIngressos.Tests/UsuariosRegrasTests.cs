@@ -3,7 +3,7 @@ using Xunit;
 public class UsuariosRegrasTests
 {
     [Fact]
-    public void Deve_Retornar_Erro_Quando_Cpf_Duplicado()
+    public void CadastrarUsuario_CpfDuplicado_DeveRetornarErro400()
     {
         // Arrange
         int statusEsperado = 400;

@@ -3,7 +3,7 @@ using Xunit;
 public class UsuariosTests
 {
     [Fact]
-    public void Deve_Criar_Usuario_Valido()
+    public void CriarUsuario_ComCpfValido_DeveRetornarVerdadeiro()
     {
         // Arrange
         var cpf = "12345678900";

@@ -69,5 +69,61 @@ public static class EventosEndpoints
 
             return Results.Ok("Evento removido com sucesso.");
         });
+        app.MapPatch("/api/eventos/{id}/adiar", async (int id, NovaDataDto dto, DbConnectionFactory factory) =>
+        {
+            using var db = factory.CreateConnection();
+
+            var evento = await db.QueryFirstOrDefaultAsync<Evento>(
+                "SELECT Id, DataEvento FROM Eventos WHERE Id = @Id",
+                new { Id = id }
+            );
+
+            if (evento is null)
+                return Results.NotFound("Evento não encontrado.");
+
+            if (evento.DataEvento <= DateTime.UtcNow)
+                return Results.BadRequest("Não é possível adiar um evento que já ocorreu.");
+
+            if (dto.NovaData <= DateTime.UtcNow)
+                return Results.BadRequest("A nova data do evento deve ser no futuro.");
+
+            if (dto.NovaData <= evento.DataEvento)
+                return Results.BadRequest("A nova data deve ser estritamente posterior à data original.");
+
+            var sqlUpdate = "UPDATE Eventos SET DataEvento = @NovaData WHERE Id = @Id";
+            await db.ExecuteAsync(sqlUpdate, new { NovaData = dto.NovaData, Id = id });
+
+            return Results.Ok("Evento adiado com sucesso.");
+        });
+
+        app.MapGet("/api/eventos/{id}/relatorio-vendas", async (int id, DbConnectionFactory factory) =>
+        {
+            using var db = factory.CreateConnection();
+            
+            var eventoExiste = await db.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM Eventos WHERE Id = @Id", new { Id = id });
+
+            if (eventoExiste == 0)
+                return Results.NotFound("Evento não encontrado.");
+
+            var sql = @"
+                SELECT 
+                    e.Nome AS NomeEvento,
+                    e.CapacidadeTotal,
+                    COUNT(r.Id) AS IngressosVendidos,
+                    (e.CapacidadeTotal - COUNT(r.Id)) AS VagasDisponiveis,
+                    COALESCE(SUM(r.ValorFinalPago), 0) AS FaturamentoTotal
+                FROM Eventos e
+                LEFT JOIN Reservas r ON e.Id = r.EventoId
+                WHERE e.Id = @Id
+                GROUP BY e.Id, e.Nome, e.CapacidadeTotal
+            ";
+
+            var relatorio = await db.QueryFirstOrDefaultAsync(sql, new { Id = id });
+
+            return Results.Ok(relatorio);
+        });
     }
 }
+
+public record NovaDataDto(DateTime NovaData);
